@@ -954,6 +954,19 @@ let authMode = 'signin';
 async function initSupabase() {
   const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
   supabase = createClient(SUPA_URL, SUPA_KEY);
+
+  // Handle email confirmation redirect
+  const hash = window.location.hash;
+  if (hash && hash.includes('access_token')) {
+    const params = new URLSearchParams(hash.substring(1));
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+    if (accessToken) {
+      await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+      window.location.hash = '';
+    }
+  }
+
   const { data: { session } } = await supabase.auth.getSession();
   if (session?.user) setUser(session.user);
   supabase.auth.onAuthStateChange((_event, session) => {
@@ -1025,10 +1038,7 @@ async function handleAuth() {
         options: { data: { display_name: name || email.split('@')[0] } }
       });
       if (error) throw error;
-      // Auto sign in after signup
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) throw signInError;
-      closeAuthModal();
+      showAuthError('✓ Account created! Check your email to confirm then sign in.', true);
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
