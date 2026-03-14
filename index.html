@@ -1020,12 +1020,15 @@ async function handleAuth() {
   btn.textContent = authMode === 'signup' ? 'Creating account...' : 'Signing in...';
   try {
     if (authMode === 'signup') {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email, password,
         options: { data: { display_name: name || email.split('@')[0] } }
       });
       if (error) throw error;
-      showAuthError('Check your email to confirm your account!', true);
+      // Auto sign in after signup
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) throw signInError;
+      closeAuthModal();
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
