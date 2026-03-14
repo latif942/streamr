@@ -434,7 +434,44 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
   .detail-body{padding:0 1.2rem 3rem}
 }
 
-.err{background:rgba(229,9,20,0.1);border:1px solid rgba(229,9,20,0.2);color:#ff7070;padding:12px 16px;border-radius:8px;font-size:13px;text-align:center}
+/* ── DISCLAIMER ── */
+.disclaimer-overlay{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;padding:1.5rem;
+}
+.disclaimer-overlay.show{display:flex}
+.disclaimer-box{
+  background:linear-gradient(160deg,#0e1228 0%,#111830 100%);
+  border:1px solid rgba(255,255,255,0.1);border-radius:16px;
+  padding:2.5rem 2rem 2rem;max-width:480px;width:100%;
+  box-shadow:0 40px 100px rgba(0,0,0,0.8);
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+}
+.disclaimer-icon{
+  width:70px;height:70px;margin-bottom:1.2rem;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;
+}
+.disclaimer-title{font-size:22px;font-weight:800;margin-bottom:1.5rem;color:#fff}
+.disclaimer-scroll{
+  max-height:280px;overflow-y:auto;text-align:left;
+  margin-bottom:1.8rem;padding-right:8px;
+}
+.disclaimer-scroll::-webkit-scrollbar{width:4px}
+.disclaimer-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,0.05);border-radius:2px}
+.disclaimer-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:2px}
+.disclaimer-scroll p{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.75;margin-bottom:1rem}
+.disclaimer-scroll p:last-child{margin-bottom:0}
+.disclaimer-scroll strong{color:#fff}
+.disclaimer-agree{
+  width:100%;padding:13px;
+  background:linear-gradient(135deg,#0063e5,#0483ee);
+  color:#fff;border:none;border-radius:8px;
+  font-size:15px;font-weight:700;font-family:'Inter',sans-serif;
+  cursor:pointer;transition:opacity 0.2s;letter-spacing:0.3px;
+}
+.disclaimer-agree:hover{opacity:0.88}
 
 @media(max-width:1024px){
   .hero-right{display:none}
@@ -672,6 +709,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
   </div>
 </div>
 
+<!-- DISCLAIMER -->
+<div class="disclaimer-overlay show" id="disclaimerOverlay">
+  <div class="disclaimer-box">
+    <div class="disclaimer-icon">⚓</div>
+    <div class="disclaimer-title">Disclaimer</div>
+    <div class="disclaimer-scroll">
+      <p>Streamr is an open-source project created for educational and personal use. It functions as a film and TV discovery platform and does not claim ownership of any media content displayed.</p>
+      <p>All data including titles, posters, and metadata is retrieved from a third-party public API (The Movie Database). Streaming links or embeds shown on this site are sourced from external providers. <strong>Streamr does not host, store, or upload any content.</strong></p>
+      <p>Any media streamed via this platform originates from third-party embed services. Streamr has no control over, and takes no responsibility for, the content, availability, or legality of streams provided by those external services.</p>
+      <p>By continuing, you acknowledge that you understand this platform is for educational purposes only and agree to use it responsibly in accordance with the laws of your country.</p>
+    </div>
+    <button class="disclaimer-agree" onclick="agreeDisclaimer()">I Agree</button>
+  </div>
+</div>
+
 <script>
 const KEY = 'fa64f41725332deb0b80d192ffc69f2e';
 const BASE = 'https://api.themoviedb.org/3';
@@ -681,6 +733,15 @@ const BACK = 'https://image.tmdb.org/t/p/w1280';
 let heroItems=[], heroIdx=0, heroTimer=null;
 let curType='movie', curId='', curSeason=1, curEp=1, curServer='vidking', curData=null;
 let searchTO=null;
+
+// ── DISCLAIMER ──
+function agreeDisclaimer() {
+  localStorage.setItem('streamr_agreed','1');
+  document.getElementById('disclaimerOverlay').classList.remove('show');
+}
+if (localStorage.getItem('streamr_agreed')) {
+  document.getElementById('disclaimerOverlay').classList.remove('show');
+}
 
 // ── UTILS ──
 async function api(path) {
