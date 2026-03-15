@@ -801,13 +801,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="detail-servers-label">Select Server</div>
       <div class="pm-server-btns">
         <button class="psrv best active" onclick="changeServer('vidlink',event)">VidLink ★</button>
-        <button class="psrv hd-btn" onclick="changeServer('vidapi',event)">VidAPI</button>
         <button class="psrv hd-btn" onclick="changeServer('vidking',event)">VidKing</button>
         <button class="psrv" onclick="changeServer('multiembed',event)">MultiEmbed</button>
         <button class="psrv" onclick="changeServer('vidsrc',event)">VidSrc.icu</button>
         <button class="psrv" onclick="changeServer('embed.su',event)">Embed.su</button>
-        <button class="psrv" onclick="changeServer('vidsrcto',event)">VidSrc.to</button>
         <button class="psrv" onclick="changeServer('autoembed',event)">AutoEmbed</button>
+        <button class="psrv" onclick="changeServer('vidsrcto',event)">VidSrc.to</button>
         <button class="psrv" onclick="changeServer('2embed',event)">2Embed</button>
       </div>
     </div>
@@ -819,7 +818,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div class="pm-player">
       <div class="pm-loading" id="pmLoading"><div class="spinner"></div><span>Loading stream...</span></div>
-      <iframe id="stream-frame" src="" allowfullscreen allow="autoplay; fullscreen"></iframe>
+      <iframe id="stream-frame" src="" allowfullscreen allow="autoplay; fullscreen" referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
 </div>
@@ -1369,13 +1368,14 @@ async function doSearch(q) {
 // ── PLAYER ──
 function getUrl(server, type, id, s, e) {
   const urls = {
+    vidlink:   type==='movie' ? `https://vidlink.pro/movie/${id}?autoplay=true&nextbutton=true` : `https://vidlink.pro/tv/${id}/${s}/${e}?autoplay=true&nextbutton=true`,
+    vidking:   type==='movie' ? `https://www.vidking.net/embed/movie/${id}?autoPlay=true` : `https://www.vidking.net/embed/tv/${id}/${s}/${e}?autoPlay=true`,
     multiembed:type==='movie' ? `https://multiembed.mov/?video_id=${id}&tmdb=1` : `https://multiembed.mov/?video_id=${id}&s=${s}&e=${e}&tmdb=1`,
     vidsrc:    type==='movie' ? `https://vidsrc.icu/embed/movie?tmdb=${id}` : `https://vidsrc.icu/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
     'embed.su':type==='movie' ? `https://embed.su/embed/movie/${id}` : `https://embed.su/embed/tv/${id}/${s}/${e}`,
-    vidsrcto:  type==='movie' ? `https://vidsrc.to/embed/movie/${id}` : `https://vidsrc.to/embed/tv/${id}/${s}/${e}`,
     autoembed: type==='movie' ? `https://autoembed.co/movie/tmdb/${id}` : `https://autoembed.co/tv/tmdb/${id}-${s}-${e}`,
+    vidsrcto:  type==='movie' ? `https://vidsrc.to/embed/movie/${id}` : `https://vidsrc.to/embed/tv/${id}/${s}/${e}`,
     '2embed':  type==='movie' ? `https://2embed.cc/embed/${id}` : `https://2embed.cc/embedtv/${id}&s=${s}&e=${e}`,
-    vidking:   type==='movie' ? `https://www.vidking.net/embed/movie/${id}?autoPlay=true` : `https://www.vidking.net/embed/tv/${id}/${s}/${e}?autoPlay=true`,
   };
   return urls[server]||'';
 }
