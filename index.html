@@ -790,7 +790,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="detail-servers-row">
       <div class="detail-servers-label">Select Server</div>
       <div class="pm-server-btns">
-        <button class="psrv best active" onclick="changeServer('vidlink',event)">VidLink ★</button>
+        <button class="psrv best active" onclick="changeServer('cinemaos',event)">CinemaOS ★</button>
+        <button class="psrv hd-btn" onclick="changeServer('vidlink',event)">VidLink</button>
         <button class="psrv hd-btn" onclick="changeServer('vidking',event)">VidKing</button>
         <button class="psrv" onclick="changeServer('multiembed',event)">MultiEmbed</button>
         <button class="psrv" onclick="changeServer('vidsrc',event)">VidSrc.icu</button>
@@ -890,7 +891,7 @@ const IMG = 'https://image.tmdb.org/t/p/w500';
 const BACK = 'https://image.tmdb.org/t/p/w1280';
 
 let heroItems=[], heroIdx=0, heroTimer=null;
-let curType='movie', curId='', curSeason=1, curEp=1, curServer='vidlink', curData=null;
+let curType='movie', curId='', curSeason=1, curEp=1, curServer='cinemaos', curData=null;
 let searchTO=null;
 
 // ── SUPABASE ──
@@ -1379,6 +1380,7 @@ async function doSearch(q) {
 // ── PLAYER ──
 function getUrl(server, type, id, s, e) {
   const urls = {
+    cinemaos:  type==='movie' ? `https://cinemaos.tech/player/${id}` : `https://cinemaos.tech/player/${id}/${s}/${e}`,
     vidlink:   type==='movie' ? `https://vidlink.pro/movie/${id}?autoplay=true&nextbutton=true` : `https://vidlink.pro/tv/${id}/${s}/${e}?autoplay=true&nextbutton=true`,
     vidking:   type==='movie' ? `https://www.vidking.net/embed/movie/${id}?autoPlay=true` : `https://www.vidking.net/embed/tv/${id}/${s}/${e}?autoPlay=true`,
     multiembed:type==='movie' ? `https://multiembed.mov/?video_id=${id}&tmdb=1` : `https://multiembed.mov/?video_id=${id}&s=${s}&e=${e}&tmdb=1`,
@@ -1425,7 +1427,7 @@ let castExpanded = false;
 let allCast = [];
 
 async function openPlayer(type, id) {
-  curType=type; curId=id; curSeason=1; curEp=1; curServer='vidlink';
+  curType=type; curId=id; curSeason=1; curEp=1; curServer='cinemaos';
   const modal = document.getElementById('playerModal');
   modal.classList.add('open');
   document.body.style.overflow='hidden';
