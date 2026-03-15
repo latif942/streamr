@@ -800,10 +800,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="detail-servers-row">
       <div class="detail-servers-label">Select Server</div>
       <div class="pm-server-btns">
-        <button class="psrv best active" onclick="changeServer('vidking',event)">VidKing ★</button>
-        <button class="psrv hd-btn" onclick="changeServer('multiembed',event)">MultiEmbed</button>
-        <button class="psrv hd-btn" onclick="changeServer('vidsrc',event)">VidSrc.icu</button>
-        <button class="psrv hd-btn" onclick="changeServer('embed.su',event)">Embed.su</button>
+        <button class="psrv best active" onclick="changeServer('vidlink',event)">VidLink ★</button>
+        <button class="psrv hd-btn" onclick="changeServer('vidapi',event)">VidAPI</button>
+        <button class="psrv hd-btn" onclick="changeServer('vidking',event)">VidKing</button>
+        <button class="psrv" onclick="changeServer('multiembed',event)">MultiEmbed</button>
+        <button class="psrv" onclick="changeServer('vidsrc',event)">VidSrc.icu</button>
+        <button class="psrv" onclick="changeServer('embed.su',event)">Embed.su</button>
         <button class="psrv" onclick="changeServer('vidsrcto',event)">VidSrc.to</button>
         <button class="psrv" onclick="changeServer('autoembed',event)">AutoEmbed</button>
         <button class="psrv" onclick="changeServer('2embed',event)">2Embed</button>
@@ -899,7 +901,7 @@ const IMG = 'https://image.tmdb.org/t/p/w500';
 const BACK = 'https://image.tmdb.org/t/p/w1280';
 
 let heroItems=[], heroIdx=0, heroTimer=null;
-let curType='movie', curId='', curSeason=1, curEp=1, curServer='vidking', curData=null;
+let curType='movie', curId='', curSeason=1, curEp=1, curServer='vidlink', curData=null;
 let searchTO=null;
 
 // ── SUPABASE ──
@@ -913,22 +915,39 @@ async function initSupabase() {
   const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
   supabase = createClient(SUPA_URL, SUPA_KEY);
 
-  // Handle email confirmation redirect
+  // Handle all Supabase auth redirects (email confirmation, magic link, etc.)
   const hash = window.location.hash;
+  const search = window.location.search;
+
   if (hash && hash.includes('access_token')) {
+    // Old token format in hash
     const params = new URLSearchParams(hash.substring(1));
     const accessToken = params.get('access_token');
     const refreshToken = params.get('refresh_token');
     if (accessToken) {
       await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-      window.location.hash = '';
+      history.replaceState(null, '', window.location.pathname);
     }
+  } else if (search && search.includes('token_hash')) {
+    // New token format in query string
+    const params = new URLSearchParams(search);
+    const tokenHash = params.get('token_hash');
+    const type = params.get('type');
+    if (tokenHash) {
+      const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: type || 'email' });
+      if (!error) history.replaceState(null, '', window.location.pathname);
+    }
+  } else if (search && search.includes('code=')) {
+    // PKCE code exchange
+    const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+    if (!error) history.replaceState(null, '', window.location.pathname);
   }
 
   const { data: { session } } = await supabase.auth.getSession();
   if (session?.user) setUser(session.user);
+
   supabase.auth.onAuthStateChange((_event, session) => {
-    if (session?.user) setUser(session.user);
+    if (session?.user) { setUser(session.user); setGreeting(); }
     else clearUser();
   });
 }
@@ -1395,7 +1414,7 @@ let castExpanded = false;
 let allCast = [];
 
 async function openPlayer(type, id) {
-  curType=type; curId=id; curSeason=1; curEp=1; curServer='vidking';
+  curType=type; curId=id; curSeason=1; curEp=1; curServer='vidlink';
   const modal = document.getElementById('playerModal');
   modal.classList.add('open');
   document.body.style.overflow='hidden';
@@ -1644,7 +1663,7 @@ async function loadFeatured() {
 function setGreeting() {
   const h = new Date().getHours();
   const greet = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
-  document.getElementById('heroGreeting').textContent = greet + (currentUser ? ', ' + (currentUser.user_metadata?.display_name || currentUser.email.split('@')[0]) : '') + ' 🖕';
+  document.getElementById('heroGreeting').textContent = greet + (currentUser ? ', ' + (currentUser.user_metadata?.display_name || currentUser.email.split('@')[0]) : '') + ' 👋';
 }
 
 // ── OVERRIDE INIT ──
