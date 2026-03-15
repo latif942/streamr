@@ -672,8 +672,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
   <div class="hero-inner-center">
     <div class="hero-greeting" id="heroGreeting">What do you want to watch?</div>
-    <h1 class="hero-main-title">Millions of <span>movies & shows</span>,<br>free forever.</h1>
-    <p class="hero-subtitle">Search anything. Watch instantly. No subscriptions needed.</p>
+    <h1 class="hero-main-title"><span>movies & shows</span>,<br>to watch for free.</h1>
+    <p class="hero-subtitle">Search anything. Watch instantly. Cole Palmer the goat.</p>
     <div class="hero-search-wrap">
       <input class="hero-search-inp" id="heroSearchInp" type="text" placeholder="Search movies, shows, actors...">
       <div class="hero-search-icon">
@@ -809,7 +809,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div class="pm-player">
       <div class="pm-loading" id="pmLoading"><div class="spinner"></div><span>Loading stream...</span></div>
-      <iframe id="stream-frame" src="" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer"></iframe>
+      <iframe id="stream-frame" src="" allowfullscreen allow="autoplay; fullscreen" referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
 </div>
@@ -894,47 +894,7 @@ let heroItems=[], heroIdx=0, heroTimer=null;
 let curType='movie', curId='', curSeason=1, curEp=1, curServer='cinemaos', curData=null;
 let searchTO=null;
 
-// ── AD BLOCKER (uBlock-style) ──
-
-// 1. Register service worker for network-level blocking
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(()=>{});
-}
-
-// 2. Block window.open completely (allow trailer opens via our own button)
-let _allowOpen = false;
-window.open = (url) => { if(_allowOpen){ _allowOpen=false; return _origOpen.call(window,url,'_blank'); } return null; };
-const _origOpen = Window.prototype.open;
-try { Window.prototype.open = (url) => null; } catch(e){}
-
-// 3. Silence alert/confirm/prompt from ad scripts
-['alert','confirm','prompt'].forEach(fn => { try{ window[fn]=()=>{}; }catch(e){} });
-
-// 4. MutationObserver — remove injected ad overlays & rogue iframes
-const OUR_IDS = new Set(['playerModal','detailBg','disclaimerOverlay','authOverlay','historyPage','searchOverlay','stream-frame']);
-const OUR_CLASSES = new Set(['player-modal','auth-overlay','disclaimer-overlay','search-overlay','history-page','dplus-nav','hero','main-content','footer']);
-new MutationObserver(muts => {
-  muts.forEach(m => m.addedNodes.forEach(node => {
-    if (node.nodeType !== 1) return;
-    // Kill rogue iframes
-    if (node.tagName === 'IFRAME' && node.id !== 'stream-frame') { node.remove(); return; }
-    // Kill high-z overlays not belonging to us
-    const st = node.style;
-    if (st && (st.position === 'fixed' || st.position === 'absolute')) {
-      const z = parseInt(st.zIndex)||0;
-      const id = node.id || '';
-      const cls = Array.from(node.classList||[]).join(' ');
-      const isOurs = OUR_IDS.has(id) || [...OUR_CLASSES].some(c=>cls.includes(c));
-      if (z > 9000 && !isOurs) { node.remove(); return; }
-    }
-    // Kill ad script tags
-    if (node.tagName === 'SCRIPT') {
-      const src = node.src || '';
-      const BAD = ['exoclick','popads','popcash','trafficjunky','adsterra','propellerads','juicyads','adnxs','doubleclick','googlesyndication','taboola','outbrain','evadav','clickadu','hilltopads'];
-      if (BAD.some(d => src.includes(d))) { node.remove(); return; }
-    }
-  }));
-}).observe(document.documentElement, { childList: true, subtree: true });
+// ── SUPABASE ──
 const SUPA_URL = 'https://nkatmjcdeamjbvwbllrs.supabase.co';
 const SUPA_KEY = 'sb_publishable__WLYsrKwIux4iNHdJs5xhQ_UwBA3rRt';
 let supabase = null;
@@ -1635,7 +1595,7 @@ function closeModal() {
 function playTrailer() {
   if(curData?.videos?.results?.length) {
     const t=curData.videos.results.find(v=>v.type==='Trailer'&&v.site==='YouTube')||curData.videos.results[0];
-    if(t) { _allowOpen=true; _origOpen.call(window,`https://youtube.com/watch?v=${t.key}`,'_blank'); }
+    if(t) window.open(`https://youtube.com/watch?v=${t.key}`,'_blank');
   } else alert('No trailer available');
 }
 window.addEventListener('click', e=>{ if(e.target===document.getElementById('playerModal')) closeModal(); });
@@ -1746,7 +1706,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <span style="color:rgba(255,255,255,0.25)" title="Did absolutely nothing">Enward</span>
         <span style="font-size:10px;color:rgba(255,255,255,0.15);margin-left:4px">(wanted to be part of it even tho he did nothing)</span>
       </div>
-      <div style="font-size:12px;color:rgba(255,255,255,0.2)">© 2026 Streamr. All rights reserved.</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.2)">fuck enward</div>
     </div>
   </div>
 </footer>
