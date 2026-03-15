@@ -203,9 +203,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .hero-search-results{
   position:absolute;top:calc(100% + 8px);left:0;right:0;
   background:var(--bg2);border:1px solid var(--border2);
-  border-radius:14px;padding:8px;z-index:10;
-  box-shadow:0 20px 60px rgba(0,0,0,0.5);
-  max-height:400px;overflow-y:auto;
+  border-radius:14px;padding:8px;z-index:500;
+  box-shadow:0 20px 60px rgba(0,0,0,0.8);
+  max-height:380px;overflow-y:auto;
   display:none;
 }
 .hero-search-results.show{display:block}
@@ -597,7 +597,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div>
       <div class="nav-brand">STREAM<span>R</span></div>
-      <div class="nav-brand-sub">Made by the Goat Deen</div>
+      <div class="nav-brand-sub">Made by Deen</div>
     </div>
   </div>
   <div class="nav-center">
@@ -681,13 +681,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="hero-search-results" id="heroSearchResults"></div>
     </div>
     <div class="hero-tags">
-      <span class="hero-tag" onclick="heroTagSearch('action')">Action</span>
-      <span class="hero-tag" onclick="heroTagSearch('comedy')">Comedy</span>
-      <span class="hero-tag" onclick="heroTagSearch('drama')">Drama</span>
-      <span class="hero-tag" onclick="heroTagSearch('thriller')">Thriller</span>
-      <span class="hero-tag" onclick="heroTagSearch('horror')">Horror</span>
-      <span class="hero-tag" onclick="heroTagSearch('sci-fi')">Sci-Fi</span>
-      <span class="hero-tag" onclick="heroTagSearch('anime')">Anime</span>
+      <span class="hero-tag" onclick="scrollToSection('all')">For You</span>
+      <span class="hero-tag" onclick="scrollToSection('movie')">Movies</span>
+      <span class="hero-tag" onclick="scrollToSection('tv')">Series</span>
+      <span class="hero-tag" onclick="scrollToSection('top')">Top Rated</span>
+      <span class="hero-tag" onclick="scrollToSection('theaters')">In Theaters</span>
     </div>
   </div>
   <!-- Featured mini cards -->
@@ -696,20 +694,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </section>
 
-<!-- CONTENT TABS -->
-<div class="content-tabs-wrap">
-  <div class="content-tabs" id="contentTabs">
-    <button class="ctab active" onclick="setCtab('all',this)">For You</button>
-    <button class="ctab" onclick="setCtab('movie',this)">Movies</button>
-    <button class="ctab" onclick="setCtab('tv',this)">Series</button>
-    <button class="ctab" onclick="setCtab('top',this)">Top Rated</button>
-    <button class="ctab" onclick="setCtab('theaters',this)">In Theaters</button>
-  </div>
-</div>
+
 
 <!-- ROWS -->
 <div class="main-content" id="mainContent">
-  <div id="rowTrendingMovies" class="content-row">
+  <div id="rowTrendingMovies" class="content-row" data-section="movie">
     <div class="row-hdr"><div class="row-ttl">🔥 Trending Movies</div><div class="row-see-all" onclick="expandRow('trendingMovies','movie')">See all</div></div>
     <div class="row-scroll-wrap">
       <button class="scroll-arrow left" onclick="scrollRow('trendingMovies',-1)">‹</button>
@@ -717,7 +706,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="scroll-arrow right" onclick="scrollRow('trendingMovies',1)">›</button>
     </div>
   </div>
-  <div id="rowTrendingTV" class="content-row">
+  <div id="rowTrendingTV" class="content-row" data-section="tv">
     <div class="row-hdr"><div class="row-ttl">📺 Trending Series</div><div class="row-see-all" onclick="expandRow('trendingTV','tv')">See all</div></div>
     <div class="row-scroll-wrap">
       <button class="scroll-arrow left" onclick="scrollRow('trendingTV',-1)">‹</button>
@@ -725,7 +714,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="scroll-arrow right" onclick="scrollRow('trendingTV',1)">›</button>
     </div>
   </div>
-  <div id="rowTopMovies" class="content-row">
+  <div id="rowTopMovies" class="content-row" data-section="top">
     <div class="row-hdr"><div class="row-ttl">⭐ Top Rated Movies</div><div class="row-see-all" onclick="expandRow('topMovies','movie')">See all</div></div>
     <div class="row-scroll-wrap">
       <button class="scroll-arrow left" onclick="scrollRow('topMovies',-1)">‹</button>
@@ -733,7 +722,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="scroll-arrow right" onclick="scrollRow('topMovies',1)">›</button>
     </div>
   </div>
-  <div id="rowPopTV" class="content-row">
+  <div id="rowPopTV" class="content-row" data-section="tv2">
     <div class="row-hdr"><div class="row-ttl">🎭 Popular Series</div><div class="row-see-all" onclick="expandRow('popTV','tv')">See all</div></div>
     <div class="row-scroll-wrap">
       <button class="scroll-arrow left" onclick="scrollRow('popTV',-1)">‹</button>
@@ -741,7 +730,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="scroll-arrow right" onclick="scrollRow('popTV',1)">›</button>
     </div>
   </div>
-  <div id="rowNowPlaying" class="content-row">
+  <div id="rowNowPlaying" class="content-row" data-section="theaters">
     <div class="row-hdr"><div class="row-ttl">🎟 Now in Theaters</div><div class="row-see-all" onclick="expandRow('nowPlaying','movie')">See all</div></div>
     <div class="row-scroll-wrap">
       <button class="scroll-arrow left" onclick="scrollRow('nowPlaying',-1)">‹</button>
@@ -749,7 +738,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="scroll-arrow right" onclick="scrollRow('nowPlaying',1)">›</button>
     </div>
   </div>
-  <div id="rowUpcoming" class="content-row">
+  <div id="rowUpcoming" class="content-row" data-section="theaters2">
     <div class="row-hdr"><div class="row-ttl">🚀 Coming Soon</div><div class="row-see-all" onclick="expandRow('upcoming','movie')">See all</div></div>
     <div class="row-scroll-wrap">
       <button class="scroll-arrow left" onclick="scrollRow('upcoming',-1)">‹</button>
@@ -1143,7 +1132,26 @@ async function api(path) {
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function scrollRow(id, dir) {
   const el = document.getElementById(id);
-  if (el) el.scrollBy({ left: dir * 600, behavior: 'smooth' });
+  if (!el) return;
+  const cardW = el.querySelector('.dcard') ? el.querySelector('.dcard').offsetWidth + 8 : 160;
+  const amount = cardW * 4 * dir;
+  el.scrollBy({ left: amount, behavior: 'smooth' });
+}
+
+function scrollToSection(section) {
+  const map = {
+    all:      'rowTrendingMovies',
+    movie:    'rowTrendingMovies',
+    tv:       'rowTrendingTV',
+    top:      'rowTopMovies',
+    theaters: 'rowNowPlaying',
+  };
+  const id = map[section] || 'rowTrendingMovies';
+  const el = document.getElementById(id);
+  if (el) {
+    const offset = el.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({ top: offset, behavior: 'smooth' });
+  }
 }
 
 // ── NAV SCROLL ──
@@ -1309,8 +1317,10 @@ function setNavActive(btn) {
   if(btn) btn.classList.add('active');
 }
 function navHome(btn) { setNavActive(btn); showAllRows(); }
-function navMovies(btn) { setNavActive(btn); setCtab('movie', document.querySelectorAll('.ctab')[1]); }
-function navSeries(btn) { setNavActive(btn); setCtab('tv', document.querySelectorAll('.ctab')[2]); }
+function navMovies(btn) { setNavActive(btn); scrollToSection('movie'); }
+function navSeries(btn) { setNavActive(btn); scrollToSection('tv'); }
+function navTrending(btn) { setNavActive(btn); scrollToSection('all'); }
+function navTopRated(btn) { setNavActive(btn); scrollToSection('top'); }
 function navTrending(btn) {
   setNavActive(btn);
   document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('active'));
