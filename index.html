@@ -536,7 +536,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .history-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .history-empty{text-align:center;color:var(--muted);padding:4rem 0;font-size:14px;grid-column:1/-1}
 
-/* ── DISCLAIMER ── */
+/* ── ADBLOCKER TOAST ── */
+.adblock-toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9997;
+  background:var(--bg2);border:1px solid rgba(139,92,246,0.3);
+  border-radius:12px;padding:14px 20px;
+  display:flex;align-items:center;gap:14px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.6);
+  max-width:480px;width:calc(100% - 2rem);
+  animation:slideUp 0.3s ease;
+  transition:opacity 0.3s;
+}
+@keyframes slideUp{from{transform:translateX(-50%) translateY(20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.adblock-toast-icon{font-size:22px;flex-shrink:0}
+.adblock-toast-text{flex:1;font-size:13px;color:rgba(255,255,255,0.8);line-height:1.5}
+.adblock-toast-text strong{color:#fff;display:block;margin-bottom:2px}
+.adblock-toast-link{
+  color:var(--purple3);font-weight:600;text-decoration:none;white-space:nowrap;
+  font-size:12px;background:var(--purple-dim);padding:6px 12px;border-radius:6px;
+  border:1px solid rgba(139,92,246,0.3);flex-shrink:0;
+}
+.adblock-toast-link:hover{background:rgba(139,92,246,0.25)}
+.adblock-toast-close{
+  background:transparent;border:none;color:var(--muted);cursor:pointer;
+  font-size:16px;padding:0 0 0 8px;flex-shrink:0;
+}
 .disclaimer-overlay{
   display:none;position:fixed;inset:0;z-index:9999;
   background:rgba(18,15,29,0.92);backdrop-filter:blur(10px);
@@ -809,9 +833,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div class="pm-player">
       <div class="pm-loading" id="pmLoading"><div class="spinner"></div><span>Loading stream...</span></div>
-      <iframe id="stream-frame" src="" allowfullscreen allow="autoplay; fullscreen" referrerpolicy="no-referrer"></iframe>
+      <iframe id="stream-frame" src="" allowfullscreen allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
+</div>
+
+<!-- ADBLOCKER TOAST -->
+<div class="adblock-toast" id="adblockToast" style="display:none">
+  <div class="adblock-toast-icon">🛡️</div>
+  <div class="adblock-toast-text">
+    <strong>Seeing inappropriate ads?</strong>
+    <span id="adblockMsg">PC: Install uBlock Origin · Mobile: Use Brave Browser</span>
+  </div>
+  <a class="adblock-toast-link" id="adblockLink" href="https://ublockorigin.com" target="_blank">Fix Ads</a>
+  <button class="adblock-toast-close" onclick="dismissAdToast()">✕</button>
 </div>
 
 <!-- DISCLAIMER -->
@@ -894,7 +929,81 @@ let heroItems=[], heroIdx=0, heroTimer=null;
 let curType='movie', curId='', curSeason=1, curEp=1, curServer='cinemaos', curData=null;
 let searchTO=null;
 
-// ── SUPABASE ──
+// ── ADBLOCKER TOAST ──
+let adToastShown = false;
+function showAdToast() {
+  if (adToastShown || localStorage.getItem('streamr_adtoast_dismissed')) return;
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const msg = document.getElementById('adblockMsg');
+  const link = document.getElementById('adblockLink');
+  if (isAndroid) {
+    msg.textContent = 'Use Brave Browser or Firefox + uBlock Origin to block ads.';
+    link.href = 'https://brave.com/download/';
+    link.textContent = 'Get Brave';
+  } else if (isIOS) {
+    msg.textContent = 'Use Brave Browser or Safari + AdGuard to block ads on iPhone.';
+    link.href = 'https://brave.com/download/';
+    link.textContent = 'Get Brave';
+  } else {
+    msg.textContent = 'Install uBlock Origin in your browser to block all ads for free.';
+    link.href = 'https://ublockorigin.com';
+    link.textContent = 'Install Free';
+  }
+  const toast = document.getElementById('adblockToast');
+  toast.style.display = 'flex';
+  adToastShown = true;
+  setTimeout(() => dismissAdToast(), 14000);
+}
+function dismissAdToast() {
+  const toast = document.getElementById('adblockToast');
+  toast.style.opacity = '0';
+  setTimeout(() => { toast.style.display = 'none'; }, 300);
+  localStorage.setItem('streamr_adtoast_dismissed', '1');
+}
+
+// ── AD BLOCKER (uBlock-style) ──
+
+// 1. Register service worker for network-level blocking
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+
+// 2. Block window.open completely (allow trailer opens via our own button)
+let _allowOpen = false;
+window.open = (url) => { if(_allowOpen){ _allowOpen=false; return _origOpen.call(window,url,'_blank'); } return null; };
+const _origOpen = Window.prototype.open;
+try { Window.prototype.open = (url) => null; } catch(e){}
+
+// 3. Silence alert/confirm/prompt from ad scripts
+['alert','confirm','prompt'].forEach(fn => { try{ window[fn]=()=>{}; }catch(e){} });
+
+// 4. MutationObserver — remove injected ad overlays & rogue iframes
+const OUR_IDS = new Set(['playerModal','detailBg','disclaimerOverlay','authOverlay','historyPage','searchOverlay','stream-frame']);
+const OUR_CLASSES = new Set(['player-modal','auth-overlay','disclaimer-overlay','search-overlay','history-page','dplus-nav','hero','main-content','footer']);
+new MutationObserver(muts => {
+  muts.forEach(m => m.addedNodes.forEach(node => {
+    if (node.nodeType !== 1) return;
+    // Kill rogue iframes
+    if (node.tagName === 'IFRAME' && node.id !== 'stream-frame') { node.remove(); return; }
+    // Kill high-z overlays not belonging to us
+    const st = node.style;
+    if (st && (st.position === 'fixed' || st.position === 'absolute')) {
+      const z = parseInt(st.zIndex)||0;
+      const id = node.id || '';
+      const cls = Array.from(node.classList||[]).join(' ');
+      const isOurs = OUR_IDS.has(id) || [...OUR_CLASSES].some(c=>cls.includes(c));
+      if (z > 9000 && !isOurs) { node.remove(); return; }
+    }
+    // Kill ad script tags
+    if (node.tagName === 'SCRIPT') {
+      const src = node.src || '';
+      const BAD = ['exoclick','popads','popcash','trafficjunky','adsterra','propellerads','juicyads','adnxs','doubleclick','googlesyndication','taboola','outbrain','evadav','clickadu','hilltopads'];
+      if (BAD.some(d => src.includes(d))) { node.remove(); return; }
+    }
+  }));
+}).observe(document.documentElement, { childList: true, subtree: true });
 const SUPA_URL = 'https://nkatmjcdeamjbvwbllrs.supabase.co';
 const SUPA_KEY = 'sb_publishable__WLYsrKwIux4iNHdJs5xhQ_UwBA3rRt';
 let supabase = null;
@@ -1409,6 +1518,7 @@ function loadStream() {
       fr.onload=()=>{
         ld.style.display='none';
         fr.style.opacity='1';
+        showAdToast();
         // Save to history
         if (curData) {
           saveToHistory(
@@ -1595,7 +1705,7 @@ function closeModal() {
 function playTrailer() {
   if(curData?.videos?.results?.length) {
     const t=curData.videos.results.find(v=>v.type==='Trailer'&&v.site==='YouTube')||curData.videos.results[0];
-    if(t) window.open(`https://youtube.com/watch?v=${t.key}`,'_blank');
+    if(t) { _allowOpen=true; _origOpen.call(window,`https://youtube.com/watch?v=${t.key}`,'_blank'); }
   } else alert('No trailer available');
 }
 window.addEventListener('click', e=>{ if(e.target===document.getElementById('playerModal')) closeModal(); });
@@ -1706,7 +1816,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <span style="color:rgba(255,255,255,0.25)" title="Did absolutely nothing">Enward</span>
         <span style="font-size:10px;color:rgba(255,255,255,0.15);margin-left:4px">(wanted to be part of it even tho he did nothing)</span>
       </div>
-      <div style="font-size:12px;color:rgba(255,255,255,0.2)">fuck enward</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.2)">fuck enward.</div>
     </div>
   </div>
 </footer>
