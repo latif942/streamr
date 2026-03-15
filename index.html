@@ -598,7 +598,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
     <div>
       <div class="nav-brand">STREAM<span>R</span></div>
-      <div class="nav-brand-sub">Made By The Goat Deen</div>
+      <div class="nav-brand-sub">Made by Deen</div>
     </div>
   </div>
   <div class="nav-center">
@@ -1676,7 +1676,7 @@ async function loadFeatured() {
 function setGreeting() {
   const h = new Date().getHours();
   const greet = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
-  document.getElementById('heroGreeting').textContent = greet + (currentUser ? ', ' + (currentUser.user_metadata?.display_name || currentUser.email.split('@')[0]) : '') + ' 🖕';
+  document.getElementById('heroGreeting').textContent = greet + (currentUser ? ', ' + (currentUser.user_metadata?.display_name || currentUser.email.split('@')[0]) : '') + ' 👋';
 }
 
 // ── OVERRIDE INIT ──
@@ -1687,5 +1687,29 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
+<!-- FOOTER -->
+<footer style="background:var(--bg2);border-top:1px solid var(--border);padding:2.5rem 2rem;margin-top:2rem">
+  <div style="max-width:1300px;margin:0 auto;display:flex;flex-direction:column;gap:1rem">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--purple),var(--purple3));display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="18" height="18"><polygon points="13,9 25,16 13,23" fill="white"/><rect x="7" y="9" width="4" height="14" rx="2" fill="white"/></svg>
+      </div>
+      <span style="font-size:16px;font-weight:800;letter-spacing:3px;text-transform:uppercase">STREAMR</span>
+    </div>
+    <p style="font-size:13px;color:rgba(255,255,255,0.5);max-width:600px;line-height:1.7">
+      This site does not store any files on our server. We only link to media which is hosted on 3rd party services. All content is provided by non-affiliated third parties.
+    </p>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+      <div style="font-size:13px;color:rgba(255,255,255,0.35)">
+        Made with ❤️ by <span style="color:var(--purple3);font-weight:600">Deen</span>
+        <span style="margin:0 8px;color:rgba(255,255,255,0.15)">·</span>
+        <span style="color:rgba(255,255,255,0.25)" title="Did absolutely nothing">Enward</span>
+        <span style="font-size:10px;color:rgba(255,255,255,0.15);margin-left:6px">(wanted to be part of it even tho he did nothing)</span>
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.2)">enward is a fucking bitch</div>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>
