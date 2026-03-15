@@ -932,19 +932,20 @@ let searchTO=null;
 // ── ADBLOCKER TOAST ──
 let adToastShown = false;
 function showAdToast() {
-  if (adToastShown || localStorage.getItem('streamr_adtoast_dismissed')) return;
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const isAndroid = /Android/i.test(navigator.userAgent);
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (adToastShown) return;
+  const ua = navigator.userAgent;
+  // iPadOS 13+ reports as MacIntel but has touch — detect it
+  const isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/i.test(ua);
   const msg = document.getElementById('adblockMsg');
   const link = document.getElementById('adblockLink');
-  if (isAndroid) {
-    msg.textContent = 'Use Brave Browser or Firefox + uBlock Origin to block ads.';
-    link.href = 'https://brave.com/download/';
+  if (isIOS) {
+    msg.textContent = 'Use Brave Browser or Safari + AdGuard to block ads on iPhone/iPad.';
+    link.href = 'https://apps.apple.com/app/brave-private-web-browser/id1052879175';
     link.textContent = 'Get Brave';
-  } else if (isIOS) {
-    msg.textContent = 'Use Brave Browser or Safari + AdGuard to block ads on iPhone.';
-    link.href = 'https://brave.com/download/';
+  } else if (isAndroid) {
+    msg.textContent = 'Use Brave Browser or Firefox + uBlock Origin to block ads.';
+    link.href = 'https://play.google.com/store/apps/details?id=com.brave.browser';
     link.textContent = 'Get Brave';
   } else {
     msg.textContent = 'Install uBlock Origin in your browser to block all ads for free.';
@@ -953,6 +954,7 @@ function showAdToast() {
   }
   const toast = document.getElementById('adblockToast');
   toast.style.display = 'flex';
+  toast.style.opacity = '1';
   adToastShown = true;
   setTimeout(() => dismissAdToast(), 14000);
 }
@@ -960,7 +962,6 @@ function dismissAdToast() {
   const toast = document.getElementById('adblockToast');
   toast.style.opacity = '0';
   setTimeout(() => { toast.style.display = 'none'; }, 300);
-  localStorage.setItem('streamr_adtoast_dismissed', '1');
 }
 
 // ── AD BLOCKER (uBlock-style) ──
@@ -1816,7 +1817,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <span style="color:rgba(255,255,255,0.25)" title="Did absolutely nothing">Enward</span>
         <span style="font-size:10px;color:rgba(255,255,255,0.15);margin-left:4px">(wanted to be part of it even tho he did nothing)</span>
       </div>
-      <div style="font-size:12px;color:rgba(255,255,255,0.2)">fuck enward.</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.2)">fuck enward</div>
     </div>
   </div>
 </footer>
